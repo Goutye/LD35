@@ -23,12 +23,14 @@ local voiceInstru = {}
 
 voiceInstru.aBitFaster = EasyLD.sfx:new("assets/voices/aBitFaster.wav", 1)
 voiceInstru.beCareful = EasyLD.sfx:new("assets/voices/beCareful.wav", 1)
+voiceInstru.payAttention = EasyLD.sfx:new("assets/voices/payAttention.wav", 1)
 voiceInstru.dogChasingCat = EasyLD.sfx:new("assets/voices/dogChasingCat.wav", 1)
 voiceInstru.firstLetter = EasyLD.sfx:new("assets/voices/firstLetter.wav", 1)
 voiceInstru.firstLetterOfEachWord = EasyLD.sfx:new("assets/voices/firstLetterOfEachWord.wav", 1)
 voiceInstru.lastLetter = EasyLD.sfx:new("assets/voices/lastLetter.wav", 1)
 voiceInstru.pressEachLetter = EasyLD.sfx:new("assets/voices/pressEachLetter.wav", 1)
 voiceInstru.triangleBeforeSquare = EasyLD.sfx:new("assets/voices/triangleBeforeSquare.wav", 1)
+voiceInstru.circleAfterSquare = EasyLD.sfx:new("assets/voices/circleAfterSquare.wav", 1)
 
 local surf = nil
 local system = nil
@@ -46,6 +48,7 @@ function ILevel:initialize(score, lvl)
 	self.currentEvent = 1
 	self.currentVoice = 1
 
+	self.hasFailed = nil
 	self.isLudum = false
 	self.state = "Press First letter" --Your state
 	self.time = 0
@@ -68,7 +71,7 @@ function ILevel:initialize(score, lvl)
 
 	self.pointDisplay = self.point
 	self.timerPoint = nil
-	self.basePoint = 100
+	self.basePoint = 10
 
 	self.levelSuccess = false
 
@@ -94,7 +97,8 @@ function ILevel:initialize(score, lvl)
 		system.d = self:newSystem("assets/images/dog.png")
 		system.gd = system.d
 
-
+		system.q = system.c
+		system.i = system.d
 
 		table.insert(systemUpdate, system.s)
 		table.insert(systemUpdate, system.d)
@@ -249,7 +253,7 @@ function ILevel:update(dt)
 	if self.currentEvent <= #self.eventTable then
 		if self.time >= self.eventTimeTable[self.currentEvent] then
 			if self.state == string.sub(self.eventTable[self.currentEvent], 1, 1) then
-				self.point = self.point + 1 * self.combo * self.basePoint
+				self.point = self.point + 1 * self.combo * self.basePoint * self.level
 				self.combo = self.combo + 1
 				self:onValid()
 
@@ -289,11 +293,14 @@ function ILevel:onSuccess()
 	for _,v in pairs(systemUpdate) do
 		if self.isLudum then
 			if i >= 7 then
+				v:setEmissionRate({[0] = 2, [0.5] = 15, [0.7] = 10, [1] = 10}, {"quadinout", "linear", "bounceout"})
 				v:start()
 			end
 		else
 			if i >= 7 then return end
-			v:start()
+			if math.random() >= 1/6 then
+				v:start()
+			end
 		end
 
 		i = i + 1
@@ -311,6 +318,8 @@ function ILevel:onFail()
 	sfx.fail:play()
 	systemFail:start()
 	EasyLD.camera:shake({x = 10, y = 10}, 1, "quadout")
+
+	self.hasFailed = self.eventTable[self.currentEvent]
 end
 
 function ILevel:add(state, timeVoice, timeEvent, voiceSound)

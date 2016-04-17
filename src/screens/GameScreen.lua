@@ -6,7 +6,7 @@ local GameScreen = class('GameScreen', IScreen)
 local EndScreen = require 'screens.EndScreen'
 
 local Level = {}
-for i = 1, 7 do
+for i = 1, 16 do
 	Level[i] = require ('Level' .. i)
 end
 

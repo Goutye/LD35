@@ -1,31 +1,54 @@
 local class = require 'EasyLD.lib.middleclass'
 
 local ILevel = require 'ILevel'
-local Level4 = class('Level4', ILevel)
+local Level3 = class('Level3', ILevel)
 
-function Level4:initialize(score, lvl)
+function Level3:initialize(score, lvl)
 	ILevel.initialize(self, score, lvl)
 
-	ILevel.add(self, "d", 2, 4, "dog")
-	ILevel.add(self, "ca", 4, 6, "empty")
-	ILevel.add(self, "d", 6.5, 8.5, "dog")
-	ILevel.add(self, "ca", 8.5, 10.5, "empty")
-	ILevel.add(self, "ca", 11, 13, "cat")
-	ILevel.add(self, "d", 12.5, 14.5, "dog")
-	ILevel.add(self, "ca", 14.5, 16.5, "empty")
+	ILevel.add(self, "t", 2, 5.5, "empty")
+	ILevel.add(self, "s", 2.5, 7.5, "square")
+	ILevel.add(self, "c", 8, 10, "circle")
 
-	self.timeMaxIntro = 3
+	ILevel.add(self, "t", 10, 13, "empty")
+	ILevel.add(self, "s", 11, 15, "square")
+	ILevel.add(self, "c", 16, 18, "circle")
+	ILevel.add(self, "t", 17.5, 19.5, "triangle")
+
+	ILevel.add(self, "c", 20, 22, "circle")
+
+	self.timeMaxIntro = 4
 	ILevel.addInstruction(self, "firstLetter", 0)
-	ILevel.addInstruction(self, "beCareful", 1)
-	ILevel.addInstruction(self, "dogChasingCat", 2)
+	ILevel.addInstruction(self, "beCareful", 1.3)
+	ILevel.addInstruction(self, "triangleBeforeSquare", 2.3)
+
+	self.timePause = 0
 end
 
-function Level4:update(dt)
-	ILevel.update(self, dt)
+function Level3:update(dt)
+	if self.hasFailed ~= nil then
+		self:hasFailedOn(self.hasFailed)
+		print(self.hasFailed)
+		self.hasFailed = nil
+	end
+
+	if self.timePause <= 0 then
+		ILevel.update(self, dt)
+	else
+		self.timePause = self.timePause - dt
+		ILevel.update(self, dt)
+	end
 end
 
-function Level4:draw()
+function Level3:draw()
 	ILevel.draw(self)
 end
 
-return Level4
+function Level3:hasFailedOn(ev)
+	if ev == "t" then
+		self.timePause = 2
+		self.instructions[3]:play()
+	end
+end
+
+return Level3
