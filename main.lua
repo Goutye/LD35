@@ -3,17 +3,18 @@ package.path = package.path .. ';lib/?.lua'
 
 require 'EasyLD'
 
-GameScreen = require 'screens.GameScreen'
-
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 800
-DM = {}
+
+TitleScreen = require 'screens.TitleScreen'
+GameScreen = require 'screens.GameScreen'
 
 function EasyLD:load()
 	EasyLD.window:resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 	EasyLD.window:setTitle("LD35 - Goutye")
-	EasyLD:nextScreen(GameScreen:new())
+	
 	font = EasyLD.font:new("assets/fonts/visitor.ttf")
+	EasyLD:nextScreen(TitleScreen:new())
 end
 
 function EasyLD:preCalcul(dt)

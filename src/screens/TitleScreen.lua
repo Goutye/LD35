@@ -15,12 +15,13 @@ end
 
 function TitleScreen:update(dt)
 	if EasyLD.keyboard:isPressed(" ") then
-		EasyLD.screen:nextScreen(GameScreen:new(), "slide", {-1,0}, 2, false, "quadinout")
+		EasyLD.screen:nextScreen(GameScreen:new(), "fade", nil, 0.5, false, "quad")
 	end
 end
 
 function TitleScreen:draw()
-	font:printOutLine("??? - LD35", 20, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine("Listen And Shift", 40, EasyLD.box:new(0, 100,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine("Listen And Shift - LD35", 20, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 end
 
 function TitleScreen:onEnd()
