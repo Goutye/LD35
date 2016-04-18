@@ -2,10 +2,14 @@ local class = require 'EasyLD.lib.middleclass'
 
 local ILevel = class('ILevel')
 
+local TextUp = require 'TextUp'
+
 local sfx = {}
 sfx.valid = EasyLD.sfx:new("assets/sfx/valid.wav")
 sfx.fail = EasyLD.sfx:new("assets/sfx/fail2.wav")
 sfx.shift = EasyLD.sfx:new("assets/sfx/shift.wav")
+sfx.bestCombo = EasyLD.sfx:new("assets/voices/bestCombo.wav")
+sfx.levelPerfect = EasyLD.sfx:new("assets/voices/levelPerfect.wav")
 
 local voice = {}
 voice.square = EasyLD.sfx:new("assets/voices/square.wav", 1)
@@ -19,6 +23,14 @@ voice.ludumDare2 = EasyLD.sfx:new("assets/voices/ludumDare2.wav", 1)
 voice.circle = EasyLD.sfx:new("assets/voices/circle.wav", 1)
 voice.empty = EasyLD.sfx:new("assets/voices/empty.wav", 1)
 
+local comboVoice = {}
+comboVoice.great = EasyLD.sfx:new("assets/voices/great.wav")
+comboVoice.cool = EasyLD.sfx:new("assets/voices/cool.wav")
+comboVoice.nice  = EasyLD.sfx:new("assets/voices/nice.wav")
+comboVoice.awesome = EasyLD.sfx:new("assets/voices/awesome.wav")
+comboVoice.subarashii = EasyLD.sfx:new("assets/voices/subarashii.wav")
+comboVoice.godlike = EasyLD.sfx:new("assets/voices/godlike.wav")
+
 local voiceInstru = {}
 
 voiceInstru.aBitFaster = EasyLD.sfx:new("assets/voices/aBitFaster.wav", 1)
@@ -31,6 +43,7 @@ voiceInstru.lastLetter = EasyLD.sfx:new("assets/voices/lastLetter.wav", 1)
 voiceInstru.pressEachLetter = EasyLD.sfx:new("assets/voices/pressEachLetter.wav", 1)
 voiceInstru.triangleBeforeSquare = EasyLD.sfx:new("assets/voices/triangleBeforeSquare.wav", 1)
 voiceInstru.circleAfterSquare = EasyLD.sfx:new("assets/voices/circleAfterSquare.wav", 1)
+voiceInstru.pentagonAfterCircle = EasyLD.sfx:new("assets/voices/pentagonAfterCircle.wav", 1)
 
 local surf = nil
 local system = nil
@@ -39,6 +52,8 @@ local systemFail = nil
 local surface = {}
 local system = {}
 local systemUpdate = {}
+
+local isBestCombo = false
 
 function ILevel:initialize(score, lvl)
 	self.voiceTimeTable = {} --Time where the voice is displayed
@@ -62,11 +77,18 @@ function ILevel:initialize(score, lvl)
 	self.level = lvl or 1
 
 	self.point = 0
-	self.combo = 1
+	self.combo = 0
+	self.bestCombo = 0
+	self.fail = 0
+	self.nbFail = 0
+	self.nbPerfect = 0
 
 	if score ~= nil then
 		self.point = score.point
 		self.combo = score.combo
+		self.bestCombo = score.bestCombo
+		self.nbFail = score.nbFail
+		self.nbPerfect = score.nbPerfect
 	end
 
 	self.pointDisplay = self.point
@@ -138,6 +160,8 @@ function ILevel:initialize(score, lvl)
 	end
 
 	self.system = system
+
+	self.bucket = {}
 end
 
 function ILevel:newSystem(surf)
@@ -253,8 +277,18 @@ function ILevel:update(dt)
 	if self.currentEvent <= #self.eventTable then
 		if self.time >= self.eventTimeTable[self.currentEvent] then
 			if self.state == string.sub(self.eventTable[self.currentEvent], 1, 1) then
-				self.point = self.point + 1 * self.combo * self.basePoint * self.level
 				self.combo = self.combo + 1
+				local score = 1 * self.combo * self.basePoint * self.level
+				self.point = self.point + score
+				table.insert(self.bucket, TextUp:new(score, self.combo))
+
+				if self.combo > self.bestCombo then 
+					self.bestCombo = self.combo 
+					if not isBestCombo then
+						isBestCombo = true
+						sfx.bestCombo:play()
+					end
+				end
 				self:onValid()
 
 				if self.timerPoint then
@@ -263,8 +297,10 @@ function ILevel:update(dt)
 
 				self.timerPoint = EasyLD.flux.to(self, (0.5 + 0.1 * self.combo), {pointDisplay = self.point}):ease("quadout")
 			else
-				self.combo = 1
+				self.combo = 0
+				self.fail = self.fail + 1
 				self:onFail()
+				isBestCombo = false
 			end
 
 			self.currentEvent = self.currentEvent + 1
@@ -283,22 +319,38 @@ function ILevel:update(dt)
 		v:update(dt)
 	end
 	systemFail:update(dt)
+
+	for _,v in ipairs(self.bucket) do
+		v:update(dt)
+	end
 end
 function ILevel:randomPos()
 	return EasyLD.window.w/2, EasyLD.window.h/2--math.random(EasyLD.window.w/4, EasyLD.window.w/4*2), math.random(EasyLD.window.h/4, EasyLD.window.h/4*2)
 end
 
 function ILevel:onSuccess()
+	if self.fail == 0 then 
+		self.nbPerfect = self.nbPerfect + 1
+		sfx.levelPerfect:play()
+
+		local score = self.level * self.basePoint * self.basePoint * self.combo
+		self.point = self.point + score
+
+		self.timerPoint:stop()
+		self.timerPoint = EasyLD.flux.to(self, (0.5 + 0.1 * self.combo), {pointDisplay = self.point}):ease("quadout")
+		table.insert(self.bucket, TextUp:new(score, 40))
+	end
 	local i = 0
 	for _,v in pairs(systemUpdate) do
 		if self.isLudum then
 			if i >= 7 then
-				v:setEmissionRate({[0] = 2, [0.5] = 15, [0.7] = 10, [1] = 10}, {"quadinout", "linear", "bounceout"})
-				v:start()
+				if math.random() < 0.5 then
+					v:start()
+				end
 			end
 		else
 			if i >= 7 then return end
-			if math.random() >= 1/6 then
+			if math.random() >= 0.5 then
 				v:start()
 			end
 		end
@@ -312,6 +364,20 @@ function ILevel:onValid()
 	system[self.eventTable[self.currentEvent]].follower:moveTo(self:randomPos())
 	system[self.eventTable[self.currentEvent]]:stop()
 	system[self.eventTable[self.currentEvent]]:start()
+
+	if self.combo == 5 then
+		comboVoice.great:play()
+	end if self.combo == 10 then
+		comboVoice.nice:play()
+	end if self.combo == 20 then
+		comboVoice.cool:play()
+	end if self.combo == 30 then
+		comboVoice.awesome:play()
+	end if self.combo == 50 then
+		comboVoice.subarashii:play()
+	end if self.combo == 75 then
+		comboVoice.godlike:play()
+	end
 end
 
 function ILevel:onFail()
@@ -335,7 +401,7 @@ function ILevel:addInstruction(voiceSound, time)
 end
 
 function ILevel:getInfo()
-	return {point = self.point, combo = self.combo}
+	return {point = self.point, combo = self.combo, nbFail = self.nbFail + self.fail, bestCombo = self.bestCombo, nbPerfect = self.nbPerfect}
 end
 
 function ILevel:drawIntro()
@@ -353,10 +419,28 @@ function ILevel:draw()
 		font:printOutLine(self.state, 80, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "center", "center", EasyLD.color:new(255,255,255, 255), EasyLD.color:new(0,0,0), 1)
 	end
 
-	font:printOutLine("Level " .. self.level, 40, EasyLD.box:new(10, 0,EasyLD.window.w, EasyLD.window.h), "left", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
-	font:printOutLine(math.ceil(self.pointDisplay), 64, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine("Level " .. self.level, 60, EasyLD.box:new(10, 0,EasyLD.window.w, EasyLD.window.h), "left", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine(math.ceil(self.pointDisplay), 90, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	if self.pointDisplay >= 1000 then
+		font:print(math.floor(self.pointDisplay/1000).."   ", 90, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,0,140))
+		
+		if self.pointDisplay >= 1000000 then
+			font:print(math.floor(self.pointDisplay/1000000).."      ", 90, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(200,0,255))
+		end
+	end
 	font:printOutLine("x".. self.combo, 60, EasyLD.box:new(0, 0,EasyLD.window.w - 10, EasyLD.window.h), "right", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+
+	if isBestCombo then
+		local ratio = (math.cos(self.time*8) + 1) / 2
+		font:printOutLine("x".. self.combo, 80, EasyLD.box:new(0, 150,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,ratio*255,100 + 155*ratio), EasyLD.color:new(0,0,0), 1)
+	end
+
+	font:printOutLine("Best: x".. self.bestCombo, 60, EasyLD.box:new(0, 0,EasyLD.window.w - 10, EasyLD.window.h), "right", "bottom", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 	for _,v in pairs(systemUpdate) do
+		v:draw()
+	end
+
+	for _,v in ipairs(self.bucket) do
 		v:draw()
 	end
 

@@ -16,7 +16,7 @@ function Level5:initialize(score, lvl)
 	ILevel.add(self, "sa", 15, 17, "snake")
 	ILevel.add(self, "s", 16, 18, "square")
 	ILevel.add(self, "ca", 17, 19, "cat")
-	ILevel.add(self, "c", 18, 20, "triangle")
+	ILevel.add(self, "t", 18, 20, "triangle")
 
 	self.timeMaxIntro = 2
 	ILevel.addInstruction(self, "firstLetter", 0)

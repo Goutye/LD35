@@ -6,14 +6,9 @@ local GameScreen = class('GameScreen', IScreen)
 local EndScreen = require 'screens.EndScreen'
 
 local Level = {}
-for i = 1, 16 do
+for i = 1, 20 do
 	Level[i] = require ('Level' .. i)
 end
-
-local music = {}
-music[1] = EasyLD.music:new("assets/music/music1.wav", "static")
-music[1]:setVolume(0.2)
-
 
 function GameScreen:initialize()
 	self.current = 1
@@ -21,10 +16,8 @@ function GameScreen:initialize()
 	self.level = Level[self.current]:new()
 	self.timer = nil
 
-	self.playlist = EasyLD.playlist:new("background", nil, true)
-	self.playlist:add(music[1])
-	self.playlist:play()
 
+	self.isPause = false
 end
 
 function GameScreen:preCalcul(dt)
@@ -32,6 +25,12 @@ function GameScreen:preCalcul(dt)
 end
 
 function GameScreen:update(dt)
+	if EasyLD.keyboard:isPressed(" ") then
+		self.isPause = not self.isPause
+	end
+
+	if self.isPause then return end
+
 	self.level:update(dt)
 
 	if self.level.levelSuccess and self.timer == nil then
@@ -58,6 +57,11 @@ function GameScreen:draw()
 
 	EasyLD.graphics:setColor()
 	self.level:draw()
+
+	if self.isPause then
+		EasyLD.box:new(0, 0, EasyLD.window.w, EasyLD.window.h, EasyLD.color:new(0,0,0,200)):draw()
+		font:printOutLine("PAUSE", 100, EasyLD.box:new(0, 0,EasyLD.window.w, EasyLD.window.h-200), "center", "center", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	end
 end
 
 function GameScreen:onEnd()

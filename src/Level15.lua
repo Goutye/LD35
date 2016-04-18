@@ -21,7 +21,7 @@ function Level4:initialize(score, lvl)
 	ILevel.add(self, "e", 11, 13, "empty")
 
 	self.timeMaxIntro = 3
-	ILevel.addInstruction(self, "firstLetter", 0)
+	ILevel.addInstruction(self, "pressEachLetter", 0)
 end
 
 function Level4:update(dt)
