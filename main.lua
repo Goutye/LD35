@@ -14,7 +14,7 @@ function EasyLD:load()
 	EasyLD.window:setTitle("LD35 - Goutye")
 	
 	font = EasyLD.font:new("assets/fonts/visitor.ttf")
-	EasyLD:nextScreen(GameScreen:new())
+	EasyLD:nextScreen(TitleScreen:new())
 end
 
 function EasyLD:preCalcul(dt)
