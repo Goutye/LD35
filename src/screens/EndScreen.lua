@@ -30,10 +30,10 @@ function EndScreen:draw()
 	font:printOutLine("Thank you for playing", 80, EasyLD.box:new(0, 10,EasyLD.window.w, EasyLD.window.h), "center", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 	font:printOutLine(math.ceil(self.point), 64, EasyLD.box:new(0, 200,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 	if self.point >= 1000 then
-		font:print(math.ceil(self.point/1000).."   ", 64, EasyLD.box:new(0, 200,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(255,0,140))
+		font:print(math.floor(self.point/1000).."   ", 64, EasyLD.box:new(0, 200,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(255,0,140))
 		
 		if self.point >= 1000000 then
-			font:print(math.ceil(self.point/1000000).."      ", 64, EasyLD.box:new(0, 200,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(200,0,255))
+			font:print(math.floor(self.point/1000000).."      ", 64, EasyLD.box:new(0, 200,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(200,0,255))
 		end
 	end
 	font:printOutLine(self.pointBest, 64, EasyLD.box:new(0, 280,EasyLD.window.w/5 * 2, EasyLD.window.h), "right", "top", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)

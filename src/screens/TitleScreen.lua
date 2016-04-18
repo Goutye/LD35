@@ -173,7 +173,7 @@ function TitleScreen:draw()
 
 	local b = EasyLD.box:new(0, 300,EasyLD.window.w/3, EasyLD.window.h)
 	b:rotate(-math.pi/12, 0, 0)
-	font:printOutLine("20 levels - 15 minutes", 30, b, "center", "center", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
+	font:printOutLine("20 levels - 10 minutes", 30, b, "center", "center", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 	b.y = b.y + 30
 	font:printOutLine("Will you beat the mark?", 30, b, "center", "center", EasyLD.color:new(255,255,255), EasyLD.color:new(0,0,0), 1)
 
