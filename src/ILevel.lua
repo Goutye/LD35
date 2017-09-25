@@ -344,13 +344,15 @@ function ILevel:onSuccess()
 	for _,v in pairs(systemUpdate) do
 		if self.isLudum then
 			if i >= 7 then
-				if math.random() < 0.5 then
+				if math.random() >= 0.7 then
+					v:reset()
 					v:start()
 				end
 			end
 		else
 			if i >= 7 then return end
 			if math.random() >= 0.5 then
+				v:reset()
 				v:start()
 			end
 		end

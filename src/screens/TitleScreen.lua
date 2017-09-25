@@ -151,7 +151,7 @@ function TitleScreen:preCalcul(dt)
 end
 
 function TitleScreen:update(dt)
-	if EasyLD.keyboard:isPressed(" ") then
+	if EasyLD.keyboard:isPressed("space") then
 		EasyLD.screen:nextScreen(GameScreen:new(), "fade", nil, 0.5, false, "quad")
 	end
 
